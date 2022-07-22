@@ -1,59 +1,89 @@
-import { CLEAR_INFO, FIND_INFO_ABOUT, LOAD_MORE_MOVIES, NO_MATCHES, SEARCH_MOVIES, START_LOADING } from "../types";
+import {
+  CLEAR_INFO_ABOUT,
+  CLEAR_STATE,
+  FIND_INFO_ABOUT,
+  LOAD_MORE_MOVIES,
+  NO_MATCHES,
+  NO_MORE_MATCHES,
+  LOAD_MOVIES,
+  START_LOADING,
+  START_LOADING_MORE,
+} from '../types';
 
 const initialState = {
   Movies: [],
-  infoAbout:{},
+  infoAbout: {},
   isLoading: false,
-  areThereMatches: true
+  isThereMatche: true,
 };
 
-export const moviesReducer = (state = initialState, action) => {
+// eslint-disable-next-line default-param-last
+const moviesReducer = (state = initialState, action) => {
   switch (action.type) {
-    case SEARCH_MOVIES: {
+    case START_LOADING: {
+      return {
+        ...state,
+        Movies: [],
+        isLoading: true,
+        isThereMatche: true,
+      };
+    }
+    case LOAD_MOVIES: {
       return {
         ...state,
         Movies: action.payload,
-        isLoading: false,
-        areThereMatches: true
+        isLoading: true,
+        isThereMatche: true,
+      };
+    }
+    case START_LOADING_MORE: {
+      return {
+        ...state,
+        isLoading: true,
+        isThereMatche: true,
       };
     }
     case LOAD_MORE_MOVIES: {
       return {
         ...state,
         Movies: [...state.Movies, ...action.payload],
-        isLoading: false,
-        areThereMatches: true
+        isLoading: true,
+        isThereMatche: true,
       };
     }
-    case START_LOADING:{
+    case NO_MORE_MATCHES: {
       return {
         ...state,
-        isLoading: true,
-        areThereMatches: true
-      }
-    }
-      case NO_MATCHES:{
-      return {
-        ...state,
-        Movies:[],
         isLoading: false,
-        areThereMatches: false,
-      }
+      };
     }
-    case FIND_INFO_ABOUT:{
+    case NO_MATCHES: {
       return {
         ...state,
-        infoAbout:action.payload
-      }
+        Movies: [],
+        isLoading: false,
+        isThereMatche: false,
+      };
     }
-    case CLEAR_INFO:{
-      return{
+    case FIND_INFO_ABOUT: {
+      return {
         ...state,
-        infoAbout:{}
-      }
+        infoAbout: action.payload,
+      };
     }
-
+    case CLEAR_INFO_ABOUT: {
+      return {
+        ...state,
+        infoAbout: {},
+        isLoading: false,
+      };
+    }
+    case CLEAR_STATE: {
+      return initialState;
+    }
     default:
       return state;
   }
 };
+
+export default moviesReducer;

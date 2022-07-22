@@ -1,80 +1,105 @@
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Button,
-  TextInput,
-  Image,
-  Alert,
-} from "react-native";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { SearchMovies, StartLoading } from "../store/actions/movies";
-import SimplePoster from "../components/SimplePoster";
-import { SearchBar } from "react-native-elements";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ListEmptyComponent from "../components/ListEmptyComponent";
-import FooterIndicator from "../components/FooterIndicator";
+  View, Text, StyleSheet, FlatList, RefreshControl,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  clearSearch, searchMovies, startLoading, startLoadingMore,
+} from '../store/actions/movies';
+import SimplePoster from '../components/SimplePoster';
+import ListEmptyComponent from '../components/ListEmptyComponent';
+import FooterIndicator from '../components/FooterIndicator';
+import { debounce } from '../helper/debounce';
+import SearchBar from '../components/SearchBar';
 
-const MainScreen = () => {
+function MainScreen() {
   const insets = useSafeAreaInsets();
-  const [text, onChangeText] = useState("");
-  const [page, setPage] = useState(1);
   const dispatch = useDispatch();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [text, setText] = useState('');
+  const [page, setPage] = useState(1);
+
   const MoviesList = useSelector((state) => state.movies.Movies) ?? false;
   const MoviesListToShow = text.length < 3 ? [] : MoviesList;
-  const doSearchMovies = (text) => {
-    onChangeText(text);
-    if (text.length < 3) return true;
-    dispatch(StartLoading(true));
-    return dispatch(SearchMovies(text));
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSave = useCallback(
+    debounce((entertext) => {
+      if (entertext.length >= 3) {
+        dispatch(searchMovies(entertext));
+      }
+    }, 1000),
+    [],
+  );
+
+  const handleChange = (entertext) => {
+    setPage(1);
+    setText(entertext);
+    dispatch(startLoading());
+    if (entertext.length < 3) dispatch(clearSearch());
+    return debouncedSave(entertext);
   };
+  const onRefresh = useCallback(() => {
+    if (text.length >= 3) {
+      setIsRefreshing(true);
+      setPage(1);
+      dispatch(searchMovies(text));
+      setIsRefreshing(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
+
   const getMorePosts = () => {
-    setPage(page + 1);
-    return dispatch(SearchMovies(text, page));
+    dispatch(startLoadingMore());
+    dispatch(searchMovies(text, page + 1));
+    return setPage(page + 1);
   };
 
+  const renderitem = ({ item }) => (
+    <SimplePoster
+      posterURL={item.Poster}
+      title={item.Title}
+      type={item.Type}
+      year={item.Year}
+      id={item.imdbID}
+    />
+  );
+
+  const memoizedValue = useMemo(() => renderitem, []);
+
   return (
-    <View style={{ ...styles.container, marginTop: Math.max(insets.top, 16) }}>
+    <View style={[styles.container, { marginTop: Math.max(insets.top, 16) }]}>
       <Text style={styles.h1}>Search a Movie Title</Text>
-      <View style={styles.SearchNarContainer}>
-        <SearchBar
-          lightTheme={true}
-          placeholder="Type Here..."
-          onChangeText={doSearchMovies}
-          containerStyle={styles.SearchBar}
-          value={text}
-        />
+      <View style={styles.searchNarContainer}>
+        <SearchBar setSearchPhrase={handleChange} searchPhrase={text} />
       </View>
 
       <FlatList
+        removeClippedSubviews
         ListEmptyComponent={ListEmptyComponent}
         data={MoviesListToShow}
         initialNumToRender={5}
-        contentContainerStyle={styles.FlarlistContainerStyle}
-        renderItem={(props) => <SimplePoster item={props.item} />}
-        keyExtractor={(item) => {
-          return item.imdbID.toString();
-        }}
+        contentContainerStyle={styles.flatlistContainer}
+        renderItem={memoizedValue}
+        keyExtractor={(item) => item.imdbID.toString()}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
         onEndReached={getMorePosts}
-        ListFooterComponent={() => <FooterIndicator />}
-        onEndReachedThreshold={0.5}
+        ListFooterComponent={FooterIndicator}
+        onEndReachedThreshold={0.2}
       />
     </View>
   );
-};
+}
 const styles = StyleSheet.create({
-  SearchBar: {
-    width: "80%",
+  searchNarContainer: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  SearchNarContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  FlarlistContainerStyle: {
-    alignItems: "center",
+  flatlistContainer: {
+    alignItems: 'center',
   },
   container: {
     flex: 1,
@@ -88,9 +113,10 @@ const styles = StyleSheet.create({
   },
   h1: {
     fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginVertical: 20,
   },
 });
+
 export default MainScreen;

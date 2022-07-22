@@ -1,70 +1,60 @@
-import { View, Text, Image, Dimensions, StyleSheet } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ClearInfo, FindDetails } from "../store/actions/movies";
-import AutoHeightImage from "react-native-auto-height-image";
-import { ScrollView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "../theme";
-const windowsWidth = Dimensions.get("window").width;
+import React, { useEffect, useState } from 'react';
+import {
+  View, Text, Dimensions, StyleSheet, Pressable, ScrollView,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import AutoHeightImage from 'react-native-auto-height-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
+import { clearInfoAbout, fndDetails } from '../store/actions/movies';
+import { colors } from '../theme';
+import AboutPostList from '../components/AboutPostList';
 
-const AboutPost = ({ route }) => {
-  const PostId = route.params?.PostId ?? 0;
+function AboutPost() {
   const dispatch = useDispatch();
+  const route = useRoute();
   const insets = useSafeAreaInsets();
-  const [isShort, setIsShort] = useState(true);
 
+  const windowsWidth = Dimensions.get('window').width;
+  const [isShort, setIsShort] = useState(true);
+  const postId = route.params?.PostId ?? 0;
   const infoAbout = useSelector((state) => state.movies.infoAbout) ?? false;
 
-  const InfoList = Object.keys(infoAbout)
-    .map((key, index) => {
-      if (index > 5 && isShort) {
-        return "";
-      }
-      return infoAbout[key] == "N/A" ? "" : `${key}:  ${infoAbout[key]} \n`;
-    })
-    .filter(function (el) {
-      return el != "";
-    });
-
   useEffect(() => {
-    dispatch(FindDetails(PostId));
-    return () => dispatch(ClearInfo());
+    dispatch(fndDetails(postId));
+    return () => dispatch(clearInfoAbout());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <ScrollView style={styles.container}>
-      <View
-        style={{ ...styles.margins, marginBottom: Math.max(insets.bottom, 10) }}
-      >
-        <AutoHeightImage
-          width={windowsWidth - 40}
-          source={{ uri: infoAbout.Poster }}
-        />
-        <Text style={styles.InfoListStyle}>{InfoList}</Text>
+      <View style={[styles.margins, { marginBottom: Math.max(insets.bottom, 10) }]}>
+        <AutoHeightImage width={windowsWidth - 40} source={{ uri: infoAbout.Poster }} />
+        <View style={styles.AboutPostListContainer}>
+          <AboutPostList infoAbout={infoAbout} isShort={isShort} />
+        </View>
         {isShort ? (
-          <Text style={styles.TextLink} onPress={() => setIsShort(false)}>
-            See more...
-          </Text>
+          <Pressable onPress={() => setIsShort(false)}>
+            <Text style={styles.textLink} onPress={() => setIsShort(false)}>
+              See more...
+            </Text>
+          </Pressable>
         ) : (
-          <Text style={styles.TextLink} onPress={() => setIsShort(true)}>
-            {" "}
-            See less...
-          </Text>
+          <Pressable onPress={() => setIsShort(true)}>
+            <Text style={styles.textLink}>See less...</Text>
+          </Pressable>
         )}
       </View>
     </ScrollView>
   );
-};
-
-export default AboutPost;
+}
 
 const styles = StyleSheet.create({
-  InfoListStyle: {
-    fontSize: 15,
-    marginTop: 40,
+  AboutPostListContainer: {
+    marginTop: 20,
   },
-  TextLink: {
+  textLink: {
+    fontSize: 15,
     color: colors.linkColor,
   },
   margins: {
@@ -74,3 +64,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+export default AboutPost;

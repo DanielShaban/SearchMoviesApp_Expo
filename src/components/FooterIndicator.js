@@ -1,19 +1,22 @@
-import { View, ActivityIndicator, StyleSheet } from "react-native";
-import React from "react";
-import { useSelector } from "react-redux";
+import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
-const FooterIndicator = () => {
+function FooterIndicator() {
   const isLoading = useSelector((state) => state.movies.isLoading) ?? false;
-  return isLoading ? (
-    <View style={styles.container}>
-      <ActivityIndicator animating size="large" />
-    </View>
-  ) : null;
-};
+  return (
+    isLoading && (
+      <View style={styles.container}>
+        <ActivityIndicator animating size="large" />
+      </View>
+    )
+  );
+}
 
-export default FooterIndicator;
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 20,
   },
 });
+
+export default FooterIndicator;

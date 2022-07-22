@@ -1,96 +1,86 @@
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
-import React from "react";
-import AutoHeightImage from "react-native-auto-height-image";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
+import {
+  Dimensions, Pressable, StyleSheet, Text, View,
+} from 'react-native';
+import React from 'react';
+import AutoHeightImage from 'react-native-auto-height-image';
+import { useNavigation } from '@react-navigation/native';
+import noPictureAvailable from '../assets/images/No_picture_available.png';
 
-const window = Dimensions.get("window").width,
-  cardWidth = window * 0.8,
-  SimplePoster = ({ item }) => {
-    const navigation = useNavigation();
+function SimplePoster({
+  posterURL, title, type, year, id,
+}) {
+  const navigation = useNavigation();
+  const cardWidth = Dimensions.get('window').width * 0.8;
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <AutoHeightImage
-            width={cardWidth}
-            source={{
-              uri:
-                item.Poster == "N/A"
-                  ? "https://upload.wikimedia.org/wikipedia/commons/f/fc/No_picture_available.png"
-                  : item.Poster,
-            }}
-            resizeMode={"contain"}
-          />
-        </View>
-        <View style={styles.postDescriptionContainer}>
-          <View style={styles.postDescription}>
-            <Text
-              style={styles.title}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
-              maxFontSizeMultiplier={2}
-            >
-              {item.Title}
-            </Text>
-            <View style={styles.postDescriptioBottom}>
-              <Text style={styles.TextType}>{item.Type}</Text>
-              <Text>{item.Year}</Text>
-            </View>
-          </View>
-          <TouchableWithoutFeedback
-            onPress={() =>
-              navigation.navigate("AboutPost", {
-                PostId: item.imdbID,
-              })
-            }
-            containerStyle={styles.touchableContainerStyle}
-            style={styles.touchableStyle}
-          >
-            <Text style={styles.Link}>More info</Text>
-          </TouchableWithoutFeedback>
-        </View>
+  return (
+    <View style={[styles.container, { minWidth: cardWidth }]}>
+      <View style={styles.imageContainer}>
+        <AutoHeightImage
+          width={cardWidth}
+          source={posterURL === 'N/A' ? noPictureAvailable : { uri: posterURL }}
+          resizeMode="contain"
+        />
       </View>
-    );
-  };
-
-export default SimplePoster;
+      <View style={styles.postDescriptionContainer}>
+        <View style={styles.postDescription}>
+          <Text
+            style={styles.titleStyle}
+            numberOfLines={2}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            maxFontSizeMultiplier={2}
+          >
+            {title}
+          </Text>
+          <View style={styles.postDescriptioBottom}>
+            <Text style={styles.textType}>{type}</Text>
+            <Text>{year}</Text>
+          </View>
+        </View>
+        <Pressable
+          onPress={() => navigation.navigate('AboutPost', {
+            PostId: id,
+          })}
+          style={styles.pressableStyle}
+        >
+          <Text style={styles.link}>More info</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
-  Link: {
-    color: "#2089dc",
+  link: {
+    color: '#2089dc',
   },
   postDescriptionContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 20,
   },
-  touchableContainerStyle: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  touchableStyle: {
+  pressableStyle: {
     borderWidth: 1,
-    borderRadius: "8%",
-    borderColor: "#2089dc",
+    borderRadius: 8,
+    borderColor: '#2089dc',
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
   },
-  TextType: {
+  textType: {
     marginRight: 5,
   },
-  title: {
+  titleStyle: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom:5
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   container: {
-    minWidth: cardWidth,
     marginBottom: 40,
   },
   postDescription: {
-    width: "60%",
+    width: '60%',
   },
   poster: {
     flex: 1,
@@ -99,7 +89,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     marginTop: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -110,6 +100,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   postDescriptioBottom: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
 });
+
+export default SimplePoster;

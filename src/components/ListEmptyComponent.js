@@ -1,28 +1,26 @@
-import { View, Text, StyleSheet } from "react-native";
-import React from "react";
-import { useSelector } from "react-redux";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
-const ListEmptyComponent = () => {
-  const areThereMatches =
-    useSelector((state) => state.movies.areThereMatches) ?? false;
-  const text = areThereMatches
-    ? "Enter at least 3 characters to search"
-    : "There are no matches";
+function ListEmptyComponent() {
+  const isThereMatche = useSelector((state) => state.movies.isThereMatche) ?? false;
+  const text = isThereMatche ? 'Enter at least 3 characters to search' : 'There are no matches';
   return (
     <View style={styles.container}>
-      <Text style={styles.Text}>{text}</Text>
+      <Text style={styles.text}>{text}</Text>
     </View>
   );
-};
+}
 
-export default ListEmptyComponent;
 const styles = StyleSheet.create({
-  Text: {
+  text: {
     fontSize: 20,
-    fontWeight: "500",
-    color: "#bababa",
+    fontWeight: '500',
+    color: '#bababa',
   },
   container: {
-    width: "80%",
+    width: '80%',
   },
 });
+
+export default ListEmptyComponent;
