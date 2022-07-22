@@ -5,7 +5,7 @@ This is an application that demonstrates my skills in writing applications in re
 With this application, you can find movies by title and read detailed information about it
 
 **THIS IS AN EXPO VERSION !**   
-**REACT NATIVE CLI VERSION IS [HERE](./SearchMovies_ReactNativeCLI)**
+**REACT NATIVE CLI VERSION IS [HERE](https://github.com/krutoyDaniel/SearchMovies_ReactNativeCLI)**
 
 ## Demo
 https://user-images.githubusercontent.com/55671854/180353404-611f3785-2632-48ef-bc04-322d089b5fc8.mp4
